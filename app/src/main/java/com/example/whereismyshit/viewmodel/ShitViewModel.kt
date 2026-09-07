@@ -68,13 +68,15 @@ class ShitViewModel(
     }
     fun addShit(name: String,
                 isContainer: Boolean,
-                parentId: Int?) {
+                parentId: Int?,
+                imagePath: String?) {
         viewModelScope.launch {
 
             val shit = Shit(
                 name = name,
                 isContainer = isContainer,
-                parentId = parentId
+                parentId = parentId,
+                imagePath = imagePath
             )
 
             repository.insert(shit)

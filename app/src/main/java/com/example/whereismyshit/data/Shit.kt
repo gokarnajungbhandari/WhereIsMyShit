@@ -9,5 +9,7 @@ data class Shit(
 
     val name: String,
     val isContainer: Boolean,
-    val parentId: Int? = null //? makes the value nullable
+    val parentId: Int? = null, //? makes the value nullable
+
+    val imagePath: String? = null
 )

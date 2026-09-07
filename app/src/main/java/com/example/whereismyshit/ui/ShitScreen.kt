@@ -1,4 +1,8 @@
 package com.example.whereismyshit.ui
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,10 +18,14 @@ import com.example.whereismyshit.viewmodel.ShitViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.whereismyshit.data.saveResizedImage
+import com.example.whereismyshit.helper.createCameraImageUri
+import java.io.File
 
 @Composable
 fun ShitScreen(
@@ -61,6 +69,54 @@ fun ShitScreen(
     val shitList by shitFlow.collectAsState(
         initial = emptyList()
     )
+
+    val context = LocalContext.current
+
+    var selectedImagePath by remember {
+        mutableStateOf<String?>(null)
+    }
+
+    var cameraFile by remember {
+        mutableStateOf<File?>(null)
+    }
+
+    var cameraUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    val photoPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.PickVisualMedia()
+        ) { uri ->
+
+            if (uri != null) {
+                // User selected a picture
+                selectedImagePath =
+                    saveResizedImage(
+                        context = context,
+                        sourceUri = uri
+                    )
+            }
+        }
+
+    val cameraLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.TakePicture()
+        ) { success ->
+
+            if (success) {
+                cameraUri?.let { uri ->
+
+                    selectedImagePath =
+                        saveResizedImage(
+                            context = context,
+                            sourceUri = uri
+                        )
+
+                    cameraFile?.delete()
+                }
+            }
+        }
 
     Column(
         modifier = Modifier
@@ -149,6 +205,41 @@ fun ShitScreen(
                 )
             }
 
+            Row {
+
+                Button(
+                    onClick = {
+                        photoPickerLauncher.launch(
+                            PickVisualMediaRequest(
+                                ActivityResultContracts
+                                    .PickVisualMedia
+                                    .ImageOnly
+                            )
+                        )
+                    }
+                ) {
+                    Text("Choose Photo")
+                }
+
+                Spacer(
+                    modifier = Modifier.width(8.dp)
+                )
+
+                Button(
+                    onClick = {
+                        val (file, uri) =
+                            createCameraImageUri(context)
+
+                        cameraFile = file
+                        cameraUri = uri
+
+                        cameraLauncher.launch(uri)
+                    }
+                ) {
+                    Text("Take Photo")
+                }
+            }
+
             Button(
                 onClick = {
                     if (name.isNotBlank()) {
@@ -160,7 +251,8 @@ fun ShitScreen(
                                 isContainer = isContainer,
 
                                 // THIS IS IMPORTANT
-                                parentId = currentContainer?.id
+                                parentId = currentContainer?.id,
+                                imagePath = selectedImagePath
                             )
                         } else {
                             viewModel.updateShit(

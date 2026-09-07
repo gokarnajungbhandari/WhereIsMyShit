@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [Shit::class], // all the tables
-    version = 2 // if you added a column on a table, you increase the version and migrate the data from the old database version to new
+    version = 3 // if you added a column on a table, you increase the version and migrate the data from the old database version to new
 )
 abstract class AppDatabase : RoomDatabase() { // Creating a Room database
 
