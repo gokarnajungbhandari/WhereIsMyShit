@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import com.example.whereismyshit.data.Shit
 import kotlinx.coroutines.flow.Flow
 import androidx.compose.runtime.collectAsState
+import coil3.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 /*
 @Composable — tells Compose this function creates UI.
 Shit: Shit — the particular Shit this row should display.
@@ -59,45 +61,62 @@ fun ShitRow(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
-
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
-
-            Text(
-                text = shit.name,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = if (shit.isContainer) {
-                    Modifier.clickable {
-                        goToContainer()
-                    }
-                } else {
-                    Modifier
-                }
-            )
             Column(
-                Modifier.padding(5.dp)
-            ){
-                if(shit.isContainer){
-                    Text(text = "Container")
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+                Text(
+                    text = shit.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = if (shit.isContainer) {
+                        Modifier.clickable {
+                            goToContainer()
+                        }
+                    } else {
+                        Modifier
+                    }
+                )
+                Column(
+                    Modifier.padding(5.dp)
+                ) {
+                    if (shit.isContainer) {
+                        Text(text = "Container")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row {
+
+                    Button(onClick = onEdit) {
+                        Text("Edit")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Button(onClick = {
+                        showDeleteDialog = true
+                    }) {
+                        Text("Delete")
+                    }
                 }
             }
+            shit.imagePath?.let { imagePath ->
 
-            Spacer(modifier = Modifier.height(8.dp))
+                AsyncImage(
+                    model = imagePath,
+                    contentDescription = shit.name,
+                    modifier = Modifier.size(80.dp),
+                    contentScale = ContentScale.Fit
+                )
 
-            Row {
-
-                Button(onClick = onEdit) {
-                    Text("Edit")
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Button(onClick = {
-                    showDeleteDialog = true
-                }) {
-                    Text("Delete")
-                }
+                Spacer(
+                    modifier = Modifier.width(16.dp)
+                )
             }
         }
     }

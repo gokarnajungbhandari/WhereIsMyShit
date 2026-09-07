@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.dp
 import com.example.whereismyshit.data.Shit
 import kotlinx.coroutines.flow.Flow
 import androidx.compose.runtime.collectAsState
+import coil3.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 /*
 @Composable — tells Compose this function creates UI.
 Shit: Shit — the particular Shit this row should display.
@@ -74,40 +76,58 @@ fun ShitSearchResultRow(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
-
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-
-            Text(
-                text = fullPath,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = if (shit.isContainer) {
-                    Modifier.clickable {
-                        goToParentContainer(parentStack)
-                    }
-                } else {
-                    Modifier
-                }
-            )
+        Row (
+            modifier = Modifier
+            .fillMaxWidth()
+        ){
             Column(
-                Modifier.padding(5.dp)
-            ){
-                if(shit.isContainer){
-                    Text(text = "Container")
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+                Text(
+                    text = fullPath,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = if (shit.isContainer) {
+                        Modifier.clickable {
+                            goToParentContainer(parentStack)
+                        }
+                    } else {
+                        Modifier
+                    }
+                )
+                Column(
+                    Modifier.padding(5.dp)
+                ) {
+                    if (shit.isContainer) {
+                        Text(text = "Container")
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                Column {
+                    if (shit.isContainer) {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text("Child Shit Containers: $childContainers")
+                        Text("Child Shits: $childShits")
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Column {
-                if (shit.isContainer) {
-                    Spacer(modifier = Modifier.height(8.dp))
+            shit.imagePath?.let { imagePath ->
 
-                    Text("Child Shit Containers: $childContainers")
-                    Text("Child Shits: $childShits")
-                }
+                AsyncImage(
+                    model = imagePath,
+                    contentDescription = shit.name,
+                    modifier = Modifier.size(80.dp),
+                    contentScale = ContentScale.Fit
+                )
+
+                Spacer(
+                    modifier = Modifier.width(16.dp)
+                )
             }
-            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

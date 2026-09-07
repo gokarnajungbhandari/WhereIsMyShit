@@ -42,9 +42,9 @@ fun HomeScreen(
    ){
        var expanded by rememberSaveable { mutableStateOf(false) }
        var searchResults : List<Shit> = emptyList()
-       var textFieldState: TextFieldState = remember {
+       var textFieldState: TextFieldState = remember{
            TextFieldState("")
-       }
+           }
        Spacer(
            modifier = Modifier.height(50.dp)
        )

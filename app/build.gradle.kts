@@ -66,6 +66,9 @@ dependencies {
     // viewModel
     implementation(libs.androidx.lifecycle.viewmodel)
 
+    // Coil
+    implementation(libs.coil.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
