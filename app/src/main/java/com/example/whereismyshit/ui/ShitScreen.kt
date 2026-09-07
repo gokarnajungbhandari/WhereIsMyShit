@@ -12,18 +12,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.whereismyshit.data.Shit
 import com.example.whereismyshit.viewmodel.ShitViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.example.whereismyshit.data.saveResizedImage
+import com.example.whereismyshit.helper.saveResizedImage
 import com.example.whereismyshit.helper.createCameraImageUri
 import java.io.File
 
@@ -31,6 +27,7 @@ import java.io.File
 fun ShitScreen(
     viewModel: ShitViewModel,
     navController: NavController,
+    getParentpath: () -> String,
     removeLastContainerFromStack: ()-> Unit,
     addContainerToStack: (shit: Shit) -> Unit,
     getLastContainerOrNullFromStack: () -> Shit?
@@ -132,6 +129,9 @@ fun ShitScreen(
         Column(
             Modifier.fillMaxWidth()
         ) {
+            Text(
+                text = getParentpath()
+            )
             Text(
                 text = currentContainer?.name ?: "ALL OF MY SHIT",
                 style = MaterialTheme.typography.headlineLarge,

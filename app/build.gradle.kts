@@ -69,6 +69,9 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    // EXIF
+    implementation("androidx.exifinterface:exifinterface:1.4.1")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

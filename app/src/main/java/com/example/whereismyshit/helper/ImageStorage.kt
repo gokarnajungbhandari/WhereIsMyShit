@@ -1,9 +1,10 @@
-package com.example.whereismyshit.data
+package com.example.whereismyshit.helper
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.exifinterface.media.ExifInterface
 import java.io.File
 import java.util.UUID
 
@@ -12,41 +13,66 @@ fun saveResizedImage(
     sourceUri: Uri
 ): String? {
 
-    val inputStream = context.contentResolver.openInputStream(sourceUri)
-        ?: return null
+    val orientationStream =
+        context.contentResolver.openInputStream(sourceUri)
+            ?: return null
 
-    val originalBitmap = inputStream.use {
+    val exif = orientationStream.use {
+        ExifInterface(it)
+    }
+
+    val orientation = exif.getAttributeInt(
+        ExifInterface.TAG_ORIENTATION,
+        ExifInterface.ORIENTATION_NORMAL
+    )
+
+    /*val inputStream = context.contentResolver.openInputStream(sourceUri)
+        ?: return null*/
+
+    val bitmapStream =
+        context.contentResolver.openInputStream(sourceUri)
+            ?: return null
+
+    val originalBitmap = bitmapStream.use {
         BitmapFactory.decodeStream(it)
     } ?: return null
 
     val maxWidth = 1920
     val maxHeight = 1090
 
+    val rotatedBitmap =
+        rotateBitmapIfNeeded(
+            originalBitmap,
+            orientation
+        )
+
+
+
     val scale = minOf(
-        maxWidth.toFloat() / originalBitmap.width,
-        maxHeight.toFloat() / originalBitmap.height,
+        maxWidth.toFloat() / rotatedBitmap.width,
+        maxHeight.toFloat() / rotatedBitmap.height,
         1f
     )
 
     val newWidth =
-        (originalBitmap.width * scale).toInt()
+        (rotatedBitmap.width * scale).toInt()
 
     val newHeight =
-        (originalBitmap.height * scale).toInt()
+        (rotatedBitmap.height * scale).toInt()
 
     val resizedBitmap =
         if (
-            newWidth != originalBitmap.width ||
-            newHeight != originalBitmap.height
+            newWidth != rotatedBitmap.width ||
+            newHeight != rotatedBitmap.height
         ) {
             Bitmap.createScaledBitmap(
-                originalBitmap,
+                rotatedBitmap,
                 newWidth,
                 newHeight,
                 true
             )
         } else {
-            originalBitmap
+            rotatedBitmap
         }
 
     val imageDirectory = File(

@@ -105,19 +105,21 @@ fun ShitRow(
                     }
                 }
             }
-            shit.imagePath?.let { imagePath ->
+            Column(modifier = Modifier.padding(8.dp))
+            {
+                shit.imagePath?.let { imagePath ->
 
-                AsyncImage(
-                    model = imagePath,
-                    contentDescription = shit.name,
-                    modifier = Modifier.size(80.dp),
-                    contentScale = ContentScale.Fit
-                )
-
-                Spacer(
-                    modifier = Modifier.width(16.dp)
-                )
+                    AsyncImage(
+                        model = imagePath,
+                        contentDescription = shit.name,
+                        modifier = Modifier.size(120.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
             }
+            Spacer(
+                modifier = Modifier.width(8.dp)
+            )
         }
     }
     if (showDeleteDialog) {

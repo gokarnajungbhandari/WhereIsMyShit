@@ -38,6 +38,12 @@ fun WhereIsMyShitApp(viewModel: ShitViewModel) {
         return containerStack.lastOrNull()
     }
 
+    fun GetParentPath(): String{
+        return containerStack.joinToString("/") {
+            it.name
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = "home"
@@ -52,6 +58,7 @@ fun WhereIsMyShitApp(viewModel: ShitViewModel) {
         composable("containers") {
             ShitScreen(viewModel = viewModel,
                 navController = navController,
+                getParentpath = :: GetParentPath,
                 :: RemoveLastContainerFromTheStack,
                 :: AddContainerInTheStack,
                 getLastContainerOrNullFromStack = :: GetLastContainerOrNullFromStack)
