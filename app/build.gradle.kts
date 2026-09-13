@@ -72,6 +72,14 @@ dependencies {
     // EXIF
     implementation("androidx.exifinterface:exifinterface:1.4.1")
 
+    // Icons
+    implementation("androidx.compose.material:material-icons-extended")
+
+    // QR code generation
+    implementation("com.google.zxing:core:3.5.3")
+    // QR code scanning (offline, no Play Services / ML Kit needed)
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

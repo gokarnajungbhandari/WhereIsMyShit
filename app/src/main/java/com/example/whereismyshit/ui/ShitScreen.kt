@@ -30,7 +30,11 @@ fun ShitScreen(
     getParentpath: () -> String,
     removeLastContainerFromStack: ()-> Unit,
     addContainerToStack: (shit: Shit) -> Unit,
-    getLastContainerOrNullFromStack: () -> Shit?
+    getLastContainerOrNullFromStack: () -> Shit?,
+    addQr: (shit:Shit) -> Unit,
+    removeQr: (shit:Shit) -> Unit,
+    qrAvailableToPrint: () -> Boolean,
+    qrAlreadyAdded: (id:Int) -> Boolean
 ) {
     var name by remember { mutableStateOf("") } //mutableStateOf() makes compose track state of name
                                                         // remember makes compose remember the previous state of
@@ -314,7 +318,12 @@ fun ShitScreen(
 
                     getNumOfChildShits = {
                         viewModel.getNumOfChildShits(shit.id)
-                    }
+                    },
+                    addQr = addQr,
+                    removeQr = removeQr,
+                    qrAvailableToPrint = qrAvailableToPrint,
+                    qrAlreadyAdded = qrAlreadyAdded
+
                 )
             }
         }

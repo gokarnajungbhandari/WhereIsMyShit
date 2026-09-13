@@ -1,7 +1,9 @@
 package com.example.whereismyshit.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.example.whereismyshit.data.Shit
 import kotlinx.coroutines.flow.Flow
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import coil3.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 /*
@@ -29,7 +33,11 @@ fun ShitSearchResultRow(
     getParentStack:suspend (shit:Shit) -> List<Shit>,
     goToParentContainer: (parentContainerStack: List<Shit>) -> Unit,
     getNumOfChildContainers: (Int) -> Flow<Int>,
-    getNumOfChildShits: (Int) -> Flow<Int>
+    getNumOfChildShits: (Int) -> Flow<Int>,
+    addQr: (shit:Shit) -> Unit,
+    removeQr: (shit:Shit) -> Unit,
+    qrAvailableToPrint: () -> Boolean,
+    qrAlreadyAdded: (id:Int) -> Boolean
 ) {
     /*
     If the last argument to a function is another function (a lambda), Kotlin allows:
@@ -71,64 +79,113 @@ fun ShitSearchResultRow(
             "$parentPath/${shit.name}"
         }
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
+    if(shit.isContainer){
+        Row(modifier = Modifier.
+        fillMaxWidth()
+            .height(8.dp)
+            .background(color = Color.Black)){
+
+        }
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Row (
-            modifier = Modifier
-            .fillMaxWidth()
-        ){
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-
-                Text(
-                    text = fullPath,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = if (shit.isContainer) {
-                        Modifier.clickable {
-                            goToParentContainer(parentStack)
-                        }
-                    } else {
-                        Modifier
-                    }
-                )
-                Column(
-                    Modifier.padding(5.dp)
-                ) {
-                    if (shit.isContainer) {
-                        Text(text = "Container")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-                Column {
-                    if (shit.isContainer) {
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text("Child Shit Containers: $childContainers")
-                        Text("Child Shits: $childShits")
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            Column(modifier = Modifier.padding(8.dp))
+        if (shit.isContainer) {
+            Column(modifier = Modifier.width(4.dp)) { }
+        }
+        Card(
+            modifier = if (shit.isContainer)
             {
-                shit.imagePath?.let { imagePath ->
-
-                    AsyncImage(
-                        model = imagePath,
-                        contentDescription = shit.name,
-                        modifier = Modifier.size(120.dp),
-                        contentScale = ContentScale.Fit
-                    )
-                }
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                    .background(color = Color(red = 240, green = 240, blue = 90, alpha = 255),
+                        shape = RoundedCornerShape(
+                            topStart = 0.dp,
+                            topEnd = 0.dp,
+                            bottomStart = 8.dp,
+                            bottomEnd = 8.dp
+                        ))
             }
-            Spacer(
-                modifier = Modifier.width(8.dp)
-            )
+            else{
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            },
+            colors = if (shit.isContainer) {
+                CardDefaults.cardColors(
+                    containerColor = Color.Transparent
+                )}
+            else{
+                CardDefaults.cardColors()
+            }
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+
+                    Text(
+                        text = fullPath,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = if (shit.isContainer) {
+                            Modifier.clickable {
+                                goToParentContainer(parentStack)
+                            }
+                        } else {
+                            Modifier
+                        }
+                    )
+                    Column(
+                        Modifier.padding(5.dp)
+                    ) {
+                        if (shit.isContainer) {
+                            Text(text = "Container")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column {
+                        if (shit.isContainer) {
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text("Child Shit Containers: $childContainers")
+                            Text("Child Shits: $childShits")
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                }
+                QrButton(
+                    shit = shit,
+                    addQr = addQr,
+                    removeQr = removeQr,
+                    qrAvailableToPrint = qrAvailableToPrint,
+                    qrAlreadyAdded = qrAlreadyAdded
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Column(modifier = Modifier.padding(8.dp))
+                {
+                    shit.imagePath?.let { imagePath ->
+
+                        AsyncImage(
+                            model = imagePath,
+                            contentDescription = shit.name,
+                            modifier = Modifier.size(120.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+                }
+                Spacer(
+                    modifier = Modifier.width(8.dp)
+                )
+            }
+        }
+        if (shit.isContainer) {
+            Column(modifier = Modifier.width(4.dp)) { }
         }
     }
 }

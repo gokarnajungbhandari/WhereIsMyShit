@@ -1,4 +1,5 @@
 package com.example.whereismyshit.ui
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -33,7 +34,11 @@ import androidx.navigation.compose.rememberNavController
 fun HomeScreen(
     viewModel: ShitViewModel,
     changeStack: (parentStack: List<Shit>) -> Unit,
-    navController: NavController
+    navController: NavController,
+    addQr: (shit:Shit) -> Unit,
+    removeQr: (shit:Shit) -> Unit,
+    qrAvailableToPrint: () -> Boolean,
+    qrAlreadyAdded: (id:Int) -> Boolean
 ) {
    Column(
     modifier = Modifier
@@ -74,7 +79,9 @@ fun HomeScreen(
                onExpandedChange = { expanded = it },
            ) {
                // Display search results in a scrollable column
-               Column(Modifier.verticalScroll(rememberScrollState())) {
+               Column(Modifier.verticalScroll(rememberScrollState())
+                   .background(color = MaterialTheme.colorScheme.background)
+               ) {
                    viewModel.searchResults.forEach { result ->
                        ShitSearchResultRow(
                            shit = result,
@@ -95,7 +102,11 @@ fun HomeScreen(
 
                            getNumOfChildShits = {
                                viewModel.getNumOfChildShits(result.id)
-                           }
+                           },
+                           addQr = addQr,
+                           removeQr = removeQr,
+                           qrAvailableToPrint = qrAvailableToPrint,
+                           qrAlreadyAdded = qrAlreadyAdded
                        )
                        /*ListItem(
                            headlineContent = { Text(result) },
@@ -133,5 +144,16 @@ fun HomeScreen(
        Spacer(
            modifier = Modifier.height(16.dp)
        )
+
+       Box(
+           modifier = Modifier.fillMaxHeight(),
+           contentAlignment = Alignment.BottomCenter
+       ){
+           Button(onClick = {
+               navController.navigate("printQR")
+           }) {
+               Text("Print QR Codes")
+           }
+       }
    }
 }

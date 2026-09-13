@@ -1,2 +1,178 @@
 package com.example.whereismyshit.ui
 
+import android.app.Dialog
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.whereismyshit.data.Shit
+import kotlinx.coroutines.flow.Flow
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.asImageBitmap
+import coil3.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import com.example.whereismyshit.helper.QR
+/*
+@Composable — tells Compose this function creates UI.
+Shit: Shit — the particular Shit this row should display.
+Row { } — arranges the UI elements horizontally.
+Text(...) — displays the Shit's information.
+onEdit / onDelete — functions passed into ShitRow telling it what should happen when the buttons are clicked.
+*/
+@Composable
+fun ShitQrPrintRow(
+    shit: Shit,
+    getParentStack:suspend (shit:Shit) -> List<Shit>,
+    goToContainer: () -> Unit,
+    getNumOfChildContainers: (Int) -> Flow<Int>,
+    getNumOfChildShits: (Int) -> Flow<Int>,
+    addQr: (shit:Shit) -> Unit,
+    removeQr: (shit:Shit) -> Unit,
+    qrAvailableToPrint: () -> Boolean,
+    qrAlreadyAdded: (id:Int) -> Boolean
+) {
+    /*
+    If the last argument to a function is another function (a lambda), Kotlin allows:
+
+        someFunction(argument, {
+            // function
+        })
+
+    to be written more cleanly as:
+
+        someFunction(argument) {
+            // function
+        }
+    */
+    var parentStack by remember(shit.id) {
+        mutableStateOf<List<Shit>>(emptyList())
+    }
+
+    LaunchedEffect(shit.id) {
+        parentStack = getParentStack(shit)
+    }
+
+    var showQrDialog by remember {
+        mutableStateOf(false)
+    }
+
+    val childContainers by getNumOfChildContainers(shit.id)
+        .collectAsState(initial = 0)
+    /*collectAsState() takes a Flow and turns its latest value into
+    Compose State, so the UI automatically updates whenever the Flow emits a new value.*/
+
+    val childShits by getNumOfChildShits(shit.id)
+        .collectAsState(initial = 0)
+
+    val parentPath = parentStack.joinToString("/") {
+        it.name
+    }
+
+    val fullPath =
+        if (parentPath.isEmpty()) {
+            shit.name
+        } else {
+            "$parentPath/${shit.name}"
+        }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+                Text(
+                    text = fullPath,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = if (shit.isContainer) {
+                        Modifier.clickable {
+                            goToContainer()
+                        }
+                    } else {
+                        Modifier
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                QrButton(
+                    shit = shit,
+                    addQr = addQr,
+                    removeQr = removeQr,
+                    qrAvailableToPrint = qrAvailableToPrint,
+                    qrAlreadyAdded = qrAlreadyAdded
+                )
+
+                Button(
+                    onClick = {
+                        showQrDialog = true
+                    }
+                ){
+                    Text("Show QR")
+                }
+            }
+            Column(modifier = Modifier.padding(8.dp))
+            {
+                shit.imagePath?.let { imagePath ->
+
+                    AsyncImage(
+                        model = imagePath,
+                        contentDescription = shit.name,
+                        modifier = Modifier.size(120.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+            }
+            Spacer(
+                modifier = Modifier.width(8.dp)
+            )
+
+            if (showQrDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showQrDialog = false
+                    },
+
+                    title = {
+                        Text(shit.name)
+                    },
+
+                    text = {
+                        Column {
+                            Image(
+                                bitmap = QR(shit).getQrBitmap().asImageBitmap(),
+                                contentDescription = "Bitmap",
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+                    },
+
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                showQrDialog = false
+                            }
+                        ) {
+                            Text("Dismiss")
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
