@@ -12,6 +12,7 @@ lifecycle = "2.11.0"
 composeCompiler = "2.3.21"
 navigationCompose = "2.10.0"
 coil = "3.6.2"
+playServicesCodeScanner = "16.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -26,6 +27,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+play-services-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "playServicesCodeScanner" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

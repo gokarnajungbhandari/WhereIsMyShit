@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.ui.draw.scale
+import com.example.whereismyshit.helper.printBitmap
 import java.io.File
 
 @Composable
@@ -197,6 +198,7 @@ fun QrPrintScreen(
                         enabled = allSelectedToPrintQrCodes.isNotEmpty(),
                         onClick = {
                             //navController.navigate("home")
+                            printBitmap(allSelectedToPrintQrCodes,context)
                         },
                         modifier = Modifier.align(Alignment.End)
                     ) {

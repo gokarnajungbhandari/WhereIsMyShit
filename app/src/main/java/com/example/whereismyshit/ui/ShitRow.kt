@@ -130,7 +130,7 @@ fun ShitRow(
                         Modifier.padding(5.dp)
                     ) {
                         if (shit.isContainer) {
-                            Text(text = "Container")
+                            Text(text = "Container Id:${shit.id}")
                         }
                     }
 

@@ -1,4 +1,5 @@
 package com.example.whereismyshit.ui
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,6 +10,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -19,15 +23,23 @@ import com.example.whereismyshit.data.Shit
 import com.example.whereismyshit.viewmodel.ShitViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.whereismyshit.helper.getContainerIdFromQr
+import com.example.whereismyshit.helper.printBitmap
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +62,22 @@ fun HomeScreen(
        var textFieldState: TextFieldState = remember{
            TextFieldState("")
            }
+       val context = LocalContext.current
+
+       val options = GmsBarcodeScannerOptions.Builder()
+           .setBarcodeFormats(
+               Barcode.FORMAT_QR_CODE
+           )
+           .enableAutoZoom()
+           .build()
+
+       val scanner = remember {
+           GmsBarcodeScanning.getClient(
+               context,
+               options
+           )
+       }
+       val scope = rememberCoroutineScope()
        Spacer(
            modifier = Modifier.height(50.dp)
        )
@@ -120,9 +148,103 @@ fun HomeScreen(
                    }
                }
            }
+
        }
        Spacer(
-           modifier = Modifier.height(50.dp)
+           modifier = Modifier.height(20.dp)
+       )
+       IconButton(
+           onClick = {
+               /*scanner.startScan()
+                   .addOnSuccessListener { barcode ->
+
+                       val qrValue = barcode.rawValue
+
+                       if (qrValue != null) {
+
+                           val containerId =
+                               getContainerIdFromQr(qrValue)
+                           scope.launch {
+                               if (containerId != null) {
+                                   viewModel.getShit(containerId)?.let{ shit ->
+                                       val stack = viewModel.getParentStack(shit)
+                                       changeStack(stack)
+                                       navController.navigate("containers")
+                                   }
+                               }
+                           }
+
+                       }
+                   }*/
+
+
+               scanner.startScan()
+
+                   .addOnSuccessListener { barcode ->
+
+                       val qrValue =
+                           barcode.rawValue
+                               ?: return@addOnSuccessListener
+
+                       Toast.makeText(
+                           context,
+                           "QR = $qrValue",
+                           Toast.LENGTH_LONG
+                       ).show()
+
+                       val containerId =
+                           getContainerIdFromQr(qrValue)
+                               ?: return@addOnSuccessListener
+
+                       scope.launch {
+
+                           val shit =
+                               viewModel.getShit(containerId)
+                                   ?: return@launch
+
+                           if (!shit.isContainer) {
+                               return@launch
+                           }
+
+                           val stack =
+                               viewModel.getParentStack(shit) + shit
+
+                           changeStack(stack)
+
+                           navController.navigate("containers")
+                       }
+                   }
+
+                   .addOnCanceledListener {
+
+                       Toast.makeText(
+                           context,
+                           "Scan cancelled",
+                           Toast.LENGTH_SHORT
+                       ).show()
+                   }
+
+                   .addOnFailureListener { exception ->
+
+                       Toast.makeText(
+                           context,
+                           "Scanner error: ${exception.message}",
+                           Toast.LENGTH_LONG
+                       ).show()
+                   }
+           },
+           modifier = Modifier.align(Alignment.CenterHorizontally)
+       ) {
+           Icon(
+               imageVector = Icons.Filled.QrCodeScanner,
+               contentDescription = "Scan Qr Code", // For accessibility
+               modifier = Modifier.size(200.dp,200.dp),
+               tint = MaterialTheme.colorScheme.primary
+           )
+       }
+
+       Spacer(
+           modifier = Modifier.height(20.dp)
        )
        Box(
            modifier = Modifier

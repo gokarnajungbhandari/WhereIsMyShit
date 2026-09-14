@@ -80,6 +80,9 @@ dependencies {
     // QR code scanning (offline, no Play Services / ML Kit needed)
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
+    // QR code scanner
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
