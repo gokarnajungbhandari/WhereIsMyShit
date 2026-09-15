@@ -1,5 +1,6 @@
 package com.example.whereismyshit.ui
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,6 +40,8 @@ import com.example.whereismyshit.helper.printBitmap
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,13 +74,56 @@ fun HomeScreen(
            .enableAutoZoom()
            .build()
 
-       val scanner = remember {
+       /*val scanner = remember {
            GmsBarcodeScanning.getClient(
                context,
                options
            )
        }
+       val scanLauncher =
+           rememberLauncherForActivityResult(
+               contract = ScanContract()
+           ) { result ->
+
+               if (result.contents != null) {
+                   val qrValue = result.contents
+
+                   println("QR = $qrValue")
+               }
+           }
+       val scope = rememberCoroutineScope()*/
        val scope = rememberCoroutineScope()
+
+       val scanLauncher =
+           rememberLauncherForActivityResult(
+               contract = ScanContract()
+           ) { result ->
+
+               val qrValue =
+                   result.contents ?: return@rememberLauncherForActivityResult
+
+               val containerId =
+                   getContainerIdFromQr(qrValue)
+                       ?: return@rememberLauncherForActivityResult
+
+               scope.launch {
+
+                   val shit =
+                       viewModel.getShit(containerId)
+                           ?: return@launch
+
+                   if (!shit.isContainer) {
+                       return@launch
+                   }
+
+                   val stack =
+                       viewModel.getParentStack(shit) + shit
+
+                   changeStack(stack)
+
+                   navController.navigate("containers")
+               }
+           }
        Spacer(
            modifier = Modifier.height(50.dp)
        )
@@ -178,7 +224,7 @@ fun HomeScreen(
                    }*/
 
 
-               scanner.startScan()
+               /*scanner.startScan()
 
                    .addOnSuccessListener { barcode ->
 
@@ -231,7 +277,18 @@ fun HomeScreen(
                            "Scanner error: ${exception.message}",
                            Toast.LENGTH_LONG
                        ).show()
-                   }
+                   }*/
+               val options = ScanOptions().apply {
+                   setDesiredBarcodeFormats(
+                       ScanOptions.QR_CODE
+                   )
+
+                   setPrompt("Scan container QR code")
+                   setBeepEnabled(false)
+                   setOrientationLocked(false)
+               }
+
+               scanLauncher.launch(options)
            },
            modifier = Modifier.align(Alignment.CenterHorizontally)
        ) {
